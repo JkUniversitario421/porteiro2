@@ -1,77 +1,53 @@
+
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #e5ddd5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
 }
-
 .chat-container {
-  width: 100%;
-  max-width: 400px;
-  height: 90vh;
-  background-color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.chat-box {
-  flex: 1;
-  padding: 10px;
+  max-width: 500px;
+  margin: auto;
+  background: #ffffff;
+  min-height: 100vh;
+  padding: 20px;
   overflow-y: auto;
 }
-
-.input-container {
+.bot-message, .user-message {
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  max-width: 80%;
+}
+.bot-message {
+  background-color: #e0e0e0;
+  align-self: flex-start;
+}
+.user-message {
+  background-color: #aee1f9;
+  align-self: flex-end;
+  text-align: right;
+}
+.chat-button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.chat-button:hover {
+  background-color: #0056b3;
+}
+.input-area {
+  max-width: 500px;
+  margin: auto;
   padding: 10px;
-  background-color: #f0f0f0;
+  background: #fff;
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.bot-message,
-.user-message {
-  padding: 8px 12px;
-  border-radius: 20px;
-  margin: 5px 0;
-  max-width: 80%;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.bot-message {
-  background-color: #dcf8c6;
-  align-self: flex-start;
-}
-
-.user-message {
-  background-color: #34b7f1;
-  color: white;
-  align-self: flex-end;
-}
-
-button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 20px;
-  background-color: #34b7f1;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #2196f3;
-}
-
-input[type="text"] {
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
 }
