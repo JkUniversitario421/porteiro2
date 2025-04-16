@@ -1,130 +1,107 @@
+const chatBox = document.getElementById("chat-box");
+const inputContainer = document.getElementById("input-container");
+let chatState = { step: 0, bloco: "", tipo: "", nome: "" };
 
-let userType = '';
-let userName = '';
-let building = '';
-let moradores = [];
-
-function addMessage(message, isUser = false) {
-  const container = document.getElementById("chat");
-  const bubble = document.createElement("div");
-  bubble.className = isUser ? "user-message" : "bot-message";
-  bubble.textContent = message;
-  container.appendChild(bubble);
-  container.scrollTop = container.scrollHeight;
+function botTyping(callback, delay = 700) {
+  const typingMsg = document.createElement("div");
+  typingMsg.className = "bot-message";
+  typingMsg.textContent = "Digitando...";
+  chatBox.appendChild(typingMsg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+  setTimeout(() => {
+    typingMsg.remove();
+    callback();
+  }, delay);
 }
 
-function addButton(text, onClick) {
-  const container = document.getElementById("input-container");
-  const button = document.createElement("button");
-  button.textContent = text;
-  button.className = "chat-button";
-  button.onclick = onClick;
-  container.appendChild(button);
+function addMessage(text, sender = "bot") {
+  const msg = document.createElement("div");
+  msg.className = sender === "bot" ? "bot-message" : "user-message";
+  msg.textContent = text;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function clearInputArea() {
-  const inputArea = document.getElementById("input-container");
-  inputArea.innerHTML = "";
+function startChat() {
+  inputContainer.innerHTML = '<button onclick="startFlow()">Iniciar Atendimento</button>';
 }
 
-function askUserType() {
-  addMessage("Você é visitante ou entregador?");
-  clearInputArea();
-  addButton("Visitante", () => {
-    userType = "Visitante";
-    addMessage("Visitante", true);
-    askUserName();
-  });
-  addButton("Entregador", () => {
-    userType = "Entregador";
-    addMessage("Entregador", true);
-    askUserName();
+function startFlow() {
+  botTyping(() => {
+    addMessage("Em qual prédio você está?");
+    inputContainer.innerHTML = `
+      <button onclick="selectBloco('411')">411</button>
+      <button onclick="selectBloco('421')">421</button>
+    `;
+    chatState.step = 1;
   });
 }
 
-function askUserName() {
-  addMessage("Qual o seu nome?");
-  clearInputArea();
-  const input = document.createElement("input");
-  input.type = "text";
-  input.id = "textInput";
-  input.placeholder = "Digite seu nome";
-  const button = document.createElement("button");
-  button.textContent = "Enviar";
-  button.className = "chat-button";
-  button.onclick = () => {
-    const name = input.value.trim();
-    if (name) {
-      userName = name;
-      addMessage(name, true);
-      askBuilding();
-    }
-  };
-  const container = document.getElementById("input-container");
-  container.appendChild(input);
-  container.appendChild(button);
-}
-
-function askBuilding() {
-  addMessage("Em qual prédio você está?");
-  clearInputArea();
-  addButton("411", () => {
-    building = "411";
-    addMessage("411", true);
-    fetchMoradores();
-  });
-  addButton("421", () => {
-    building = "421";
-    addMessage("421", true);
-    fetchMoradores();
+function selectBloco(bloco) {
+  chatState.bloco = bloco;
+  addMessage(bloco, "user");
+  botTyping(() => {
+    addMessage("Você é visitante ou entregador?");
+    inputContainer.innerHTML = `
+      <button onclick="selectTipo('Visitante')">Visitante</button>
+      <button onclick="selectTipo('Entregador')">Entregador</button>
+    `;
+    chatState.step = 2;
   });
 }
 
-function fetchMoradores() {
-  addMessage("Buscando moradores...");
-  clearInputArea();
+function selectTipo(tipo) {
+  chatState.tipo = tipo;
+  addMessage(tipo, "user");
+  botTyping(() => {
+    addMessage("Qual o seu nome?");
+    inputContainer.innerHTML = `
+      <input type="text" id="nomeVisitante" placeholder="Digite seu nome" />
+      <button onclick="enviarNome()">Enviar</button>
+    `;
+    chatState.step = 3;
+  });
+}
 
-  fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
-    .then(response => response.json())
-    .then(data => {
-      const lista = data.filter(m =>
-        m["Prédio"] === building || m["Predio"] === building
-      );
+function enviarNome() {
+  const nome = document.getElementById("nomeVisitante").value;
+  if (!nome) return;
+  chatState.nome = nome;
+  addMessage(nome, "user");
 
-      if (!lista || lista.length === 0) {
-        addMessage("Nenhum morador encontrado para esse prédio.");
-        return;
-      }
+  botTyping(() => {
+    addMessage("Selecione o morador:");
 
-      addMessage("Selecione o morador:");
-      lista.forEach(m => {
-        const nome = m.Nome || "Sem nome";
-        const tel = m.WhatsApp || m.Telefone || "";
-        if (tel) {
-          addButton(nome, () => {
-            addMessage(nome, true);
-            openWhatsApp(tel, nome);
-          });
-        }
+    fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
+      .then(res => res.json())
+      .then(data => {
+        const moradores = data.filter(p => p.Prédio === chatState.bloco || p.Predio === chatState.bloco);
+        inputContainer.innerHTML = "";
+
+        moradores.forEach(pessoa => {
+          const btn = document.createElement("button");
+          btn.textContent = pessoa.Nome;
+          btn.onclick = () => enviarParaMorador(pessoa);
+          inputContainer.appendChild(btn);
+        });
+      })
+      .catch(() => {
+        addMessage("Erro ao buscar moradores. Verifique sua internet ou a planilha.");
       });
-    })
-    .catch(err => {
-      console.error("Erro ao buscar moradores:", err);
-      addMessage("Erro ao carregar moradores. Tente novamente.");
-    });
+  });
 }
 
-function openWhatsApp(phone, moradorNome) {
-  const numero = phone.replace(/\D/g, "");
-  const mensagem =
-    userType === "Visitante"
-      ? `Olá ${moradorNome}, o visitante ${userName} está no portão do prédio ${building}.`
-      : `Olá ${moradorNome}, o entregador ${userName} está no portão do prédio ${building}.`;
-
-  const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
-  window.open(url, "_blank");
+function enviarParaMorador(pessoa) {
+  addMessage(pessoa.Nome, "user");
+  const msg =
+    chatState.tipo === "Visitante"
+      ? `Olá ${pessoa.Nome}, ${chatState.nome} está na portaria e gostaria de entrar como visitante.`
+      : `Olá ${pessoa.Nome}, ${chatState.nome} está na portaria com uma entrega para você.`;
+  const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
+  botTyping(() => {
+    addMessage("Clique abaixo para chamar o morador:");
+    inputContainer.innerHTML = `<a href="${link}" target="_blank"><button>Chamar ${pessoa.Nome} no WhatsApp</button></a>`;
+  });
 }
 
-window.onload = () => {
-  askUserType();
-};
+startChat();
