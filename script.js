@@ -2,14 +2,17 @@ const chatBox = document.getElementById("chat-box");
 const inputContainer = document.getElementById("input-container");
 let chatState = { step: 0, bloco: "", tipo: "", nome: "" };
 
-function botTyping(callback, delay = 700) {
+function botTyping(callback, delay = 1000) {
   const typingMsg = document.createElement("div");
   typingMsg.className = "bot-message";
-  typingMsg.textContent = "Digitando...";
+  typingMsg.id = "typing-indicator";
+  typingMsg.textContent = "digitando...";
   chatBox.appendChild(typingMsg);
   chatBox.scrollTop = chatBox.scrollHeight;
+
   setTimeout(() => {
-    typingMsg.remove();
+    const indic = document.getElementById("typing-indicator");
+    if (indic) indic.remove();
     callback();
   }, delay);
 }
@@ -33,7 +36,6 @@ function startFlow() {
       <button onclick="selectBloco('411')">411</button>
       <button onclick="selectBloco('421')">421</button>
     `;
-    chatState.step = 1;
   });
 }
 
@@ -46,7 +48,6 @@ function selectBloco(bloco) {
       <button onclick="selectTipo('Visitante')">Visitante</button>
       <button onclick="selectTipo('Entregador')">Entregador</button>
     `;
-    chatState.step = 2;
   });
 }
 
@@ -59,7 +60,6 @@ function selectTipo(tipo) {
       <input type="text" id="nomeVisitante" placeholder="Digite seu nome" />
       <button onclick="enviarNome()">Enviar</button>
     `;
-    chatState.step = 3;
   });
 }
 
@@ -86,7 +86,7 @@ function enviarNome() {
         });
       })
       .catch(() => {
-        addMessage("Erro ao buscar moradores. Verifique sua internet ou a planilha.");
+        addMessage("Erro ao buscar moradores.");
       });
   });
 }
