@@ -6,7 +6,7 @@ let moradores = [];
 function addMessage(message, isUser = false) {
   const container = document.getElementById("chat");
   const bubble = document.createElement("div");
-  bubble.className = isUser ? "bubble user" : "bubble bot";
+  bubble.className = isUser ? "user-message" : "bot-message";
   bubble.textContent = message;
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
@@ -15,11 +15,16 @@ function addMessage(message, isUser = false) {
 function addButton(text, onClick) {
   const container = document.getElementById("chat");
   const button = document.createElement("button");
-  button.className = "chat-button";
   button.textContent = text;
+  button.className = "chat-button";
   button.onclick = onClick;
   container.appendChild(button);
   container.scrollTop = container.scrollHeight;
+}
+
+function clearButtons() {
+  const buttons = document.querySelectorAll("button.chat-button");
+  buttons.forEach(btn => btn.remove());
 }
 
 function askUserType() {
@@ -27,11 +32,13 @@ function askUserType() {
   addButton("Visitante", () => {
     userType = "Visitante";
     addMessage("Visitante", true);
+    clearButtons();
     askUserName();
   });
   addButton("Entregador", () => {
     userType = "Entregador";
     addMessage("Entregador", true);
+    clearButtons();
     askUserName();
   });
 }
@@ -46,15 +53,17 @@ function askUserName() {
 }
 
 function askBuilding() {
-  addMessage("Em qual prédio você está?");
+  addMessage("Qual o número do prédio?");
   addButton("411", () => {
     building = "411";
-    addMessage("411", true);
+    addMessage("Prédio 411", true);
+    clearButtons();
     fetchMoradores();
   });
   addButton("421", () => {
     building = "421";
-    addMessage("421", true);
+    addMessage("Prédio 421", true);
+    clearButtons();
     fetchMoradores();
   });
 }
@@ -75,36 +84,46 @@ function showInput(callback) {
 }
 
 function fetchMoradores() {
-  addMessage("Selecione o morador:");
+  addMessage("Carregando moradores do prédio " + building + "...");
   fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-      moradores = data.filter(m => m.Prédio === building);
-      if (moradores.length === 0) {
-        addMessage("Nenhum morador encontrado para esse prédio.");
-      } else {
-        moradores.forEach(m => {
-          addButton(m.Nome, () => {
-            addMessage(m.Nome, true);
-            openWhatsApp(m.WhatsApp, m.Nome);
-          });
-        });
+      const moradoresFiltrados = data.filter(p => p.Prédio === building || p.Predio === building);
+      if (!moradoresFiltrados.length) {
+        addMessage("Nenhum morador encontrado nesse prédio.");
+        return;
       }
+
+      addMessage("Selecione o morador:");
+      moradoresFiltrados.forEach(pessoa => {
+        addButton(pessoa.Nome, () => {
+          addMessage(pessoa.Nome, true);
+          clearButtons();
+          openWhatsApp(pessoa.WhatsApp || pessoa.Telefone, pessoa.Nome);
+        });
+      });
     })
-    .catch(error => {
-      console.error(error);
+    .catch(err => {
+      console.error("Erro ao buscar moradores:", err);
       addMessage("Erro ao carregar moradores. Tente novamente.");
     });
 }
 
-function openWhatsApp(phone, moradorNome) {
-  const message =
+function openWhatsApp(phone, nomeMorador) {
+  const mensagem =
     userType === "Visitante"
-      ? `Olá ${moradorNome}, o visitante ${userName} está no portão do prédio ${building}.`
-      : `Olá ${moradorNome}, o entregador ${userName} está no portão do prédio ${building}.`;
+      ? `Olá ${nomeMorador}, o visitante ${userName} está na portaria do prédio ${building}.`
+      : `Olá ${nomeMorador}, o entregador ${userName} está na portaria do prédio ${building}.`;
 
-  const url = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank");
+  const link = `https://wa.me/55${phone.replace(/\D/g, "")}?text=${encodeURIComponent(mensagem)}`;
+  addMessage("Clique no botão abaixo para abrir o WhatsApp:");
+  const container = document.getElementById("chat");
+  const a = document.createElement("a");
+  a.href = link;
+  a.target = "_blank";
+  a.innerHTML = `<button class="chat-button">Chamar ${nomeMorador}</button>`;
+  container.appendChild(a);
+  container.scrollTop = container.scrollHeight;
 }
 
 window.onload = () => {
