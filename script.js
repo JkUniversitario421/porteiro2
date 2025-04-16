@@ -64,29 +64,45 @@ function selectTipo(tipo) {
 }
 
 function enviarNome() {
-  const nome = document.getElementById("nomeVisitante").value;
+  const nome = document.getElementById("nomeVisitante").value.trim();
   if (!nome) return;
   chatState.nome = nome;
   addMessage(nome, "user");
   botTyping(() => {
     addMessage("Selecione o morador:");
-    fetch(`https://opensheet.elk.sh/1kY8va8gT2pJE1A3MIOQnFib5tKAFDYryhRUulAqY35U/${chatState.bloco}`)
-      .then(res => res.json())
-      .then(data => {
-        inputContainer.innerHTML = "";
-        data.forEach(pessoa => {
-          const btn = document.createElement("button");
-          btn.textContent = pessoa.Nome;
-          btn.onclick = () => enviarParaMorador(pessoa);
-          inputContainer.appendChild(btn);
-        });
-      });
+    carregarMoradores(chatState.bloco);
   });
+}
+
+function carregarMoradores(bloco) {
+  fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd?sheet=Contatos")
+    .then(res => res.json())
+    .then(data => {
+      const moradores = data.filter(p => p["Prédio"] == bloco || p["Predio"] == bloco); // aceita com ou sem acento
+      inputContainer.innerHTML = "";
+      if (moradores.length === 0) {
+        addMessage("Nenhum morador encontrado para esse prédio.");
+        return;
+      }
+      moradores.forEach(pessoa => {
+        const btn = document.createElement("button");
+        btn.textContent = pessoa.Nome;
+        btn.onclick = () => enviarParaMorador(pessoa);
+        inputContainer.appendChild(btn);
+      });
+    })
+    .catch(err => {
+      console.error("Erro ao buscar moradores:", err);
+      addMessage("Erro ao carregar moradores. Tente novamente.");
+    });
 }
 
 function enviarParaMorador(pessoa) {
   addMessage(pessoa.Nome, "user");
-  const msg = `Olá ${pessoa.Nome}, meu nome é ${chatState.nome} e estou no portão do prédio ${chatState.bloco}.`;
+  const msg =
+    chatState.tipo === "Visitante"
+      ? `Olá ${pessoa.Nome}, meu nome é ${chatState.nome} e estou na portaria como visitante do prédio ${chatState.bloco}.`
+      : `Olá ${pessoa.Nome}, meu nome é ${chatState.nome} e estou na portaria com uma entrega para você no prédio ${chatState.bloco}.`;
   const link = `https://wa.me/${pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
   botTyping(() => {
     addMessage("Clique abaixo para chamar o morador:");
