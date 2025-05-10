@@ -136,7 +136,7 @@ function enviarParaMorador(pessoa) {
     addMessage(pessoa.Nome, "user");
     
     const msg = chatState.tipo === "Visitante"
-        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do predio do N° ${chatState.bloco}, poderi me receber?.`
+        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do predio do N° ${chatState.bloco}, poderia me receber?.`
         : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao N° ${chatState.bloco}. Poderia vir buscar?`;
 
     const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
