@@ -9,7 +9,7 @@ body {
   margin: 20px auto;
   background-color: #fff;
   border-radius: 16px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -25,7 +25,8 @@ body {
   background: #d2dbdc;
 }
 
-.bot-message, .user-message {
+.bot-message,
+.user-message {
   max-width: 80%;
   margin: 8px 0;
   padding: 10px 14px;
@@ -77,4 +78,25 @@ body {
 
 .input-container button:hover {
   background-color: #0b846c;
+}
+
+/* RESPONSIVIDADE PARA SMARTPHONES */
+@media screen and (max-width: 480px) {
+  .chat-wrapper {
+    margin: 0;
+    height: 100vh;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .input-container input,
+  .input-container button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .bot-message,
+  .user-message {
+    font-size: 14px;
+  }
 }
