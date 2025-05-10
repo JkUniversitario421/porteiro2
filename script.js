@@ -66,7 +66,7 @@ function selectTipo(tipo) {
             `;
         });
     } else {
-        solicitarNome();
+        solicitarNome(); // Só pergunta o nome para Visitante
     }
 }
 
@@ -85,31 +85,16 @@ function selectPlataformaOutros() {
     if (!plataforma) return;
     chatState.plataforma = plataforma;
     addMessage(plataforma, "user");
-    solicitarNome();
+    selecionarMorador(); // Pula para seleção do morador
 }
 
 function selectPlataforma(plataforma) {
     chatState.plataforma = plataforma;
     addMessage(plataforma, "user");
-    solicitarNome();
+    selecionarMorador(); // Pula para seleção do morador
 }
 
-function solicitarNome() {
-    botTyping(() => {
-        addMessage("Qual o seu nome?");
-        inputContainer.innerHTML = `
-            <input type="text" id="nomeVisitante" placeholder="Digite seu nome" />
-            <button onclick="enviarNome()">Enviar</button>
-        `;
-    });
-}
-
-function enviarNome() {
-    const nome = document.getElementById("nomeVisitante").value;
-    if (!nome) return;
-    chatState.nome = nome;
-    addMessage(nome, "user");
-
+function selecionarMorador() {
     botTyping(() => {
         addMessage("Selecione o morador:");
         
