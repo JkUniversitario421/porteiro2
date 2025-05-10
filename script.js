@@ -1,6 +1,6 @@
 const chatBox = document.getElementById("chat-box");
 const inputContainer = document.getElementById("input-container");
-let chatState = { step: 0, bloco: "", tipo: "", plataforma: "" };
+let chatState = { step: 0, bloco: "", tipo: "", plataforma: "", nome: "" };
 
 function botTyping(callback, delay = 1000) {
     const typingMsg = document.createElement("div");
@@ -66,7 +66,14 @@ function selectTipo(tipo) {
             `;
         });
     } else {
-        solicitarNome(); // Só pergunta o nome para Visitante
+        // Se for Visitante, pergunta o nome antes de continuar
+        botTyping(() => {
+            addMessage("Qual o seu nome?");
+            inputContainer.innerHTML = `
+                <input type="text" id="nomeVisitante" placeholder="Digite seu nome" />
+                <button onclick="enviarNomeVisitante()">Enviar</button>
+            `;
+        });
     }
 }
 
@@ -85,13 +92,21 @@ function selectPlataformaOutros() {
     if (!plataforma) return;
     chatState.plataforma = plataforma;
     addMessage(plataforma, "user");
-    selecionarMorador(); // Pula para seleção do morador
+    selecionarMorador();
 }
 
 function selectPlataforma(plataforma) {
     chatState.plataforma = plataforma;
     addMessage(plataforma, "user");
-    selecionarMorador(); // Pula para seleção do morador
+    selecionarMorador();
+}
+
+function enviarNomeVisitante() {
+    const nome = document.getElementById("nomeVisitante").value;
+    if (!nome) return;
+    chatState.nome = nome;
+    addMessage(nome, "user");
+    selecionarMorador(); // Vai para a seleção de morador
 }
 
 function selecionarMorador() {
@@ -119,7 +134,10 @@ function selecionarMorador() {
 
 function enviarParaMorador(pessoa) {
     addMessage(pessoa.Nome, "user");
-    const msg = `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao número ${chatState.bloco}. Poderia vir buscar?`;
+    
+    const msg = chatState.tipo === "Visitante"
+        ? `Olá ${pessoa.Nome}, ${chatState.nome} está na portaria e gostaria de entrar como visitante.`
+        : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao número ${chatState.bloco}. Poderia vir buscar?`;
 
     const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
     
