@@ -111,11 +111,20 @@ function enviarNomeVisitante() {
 function selecionarMorador() {
     botTyping(() => {
         addMessage("Selecione o morador:");
-        
+
         fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
             .then(res => res.json())
             .then(data => {
-                const moradores = data.filter(p => p.Prédio === chatState.bloco || p.Predio === chatState.bloco);
+                // Filtrar linhas onde Nome, Prédio e Telefone/WhatsApp estejam preenchidos
+                const moradores = data.filter(p =>
+                    p.Nome && p.Nome.trim() !== "" &&
+                    (p.Prédio || p.Predio) && (p.Prédio || p.Predio).trim() !== "" &&
+                    (p.Telefone || p.WhatsApp) && (p.Telefone || p.WhatsApp).trim() !== ""
+                );
+
+                // Se quiser filtrar por prédio selecionado, descomente a linha abaixo:
+                // moradores = moradores.filter(p => (p.Prédio === chatState.bloco || p.Predio === chatState.bloco));
+
                 inputContainer.innerHTML = "";
 
                 moradores.forEach(pessoa => {
@@ -124,6 +133,10 @@ function selecionarMorador() {
                     btn.onclick = () => enviarParaMorador(pessoa);
                     inputContainer.appendChild(btn);
                 });
+
+                if (moradores.length === 0) {
+                    addMessage("Nenhum morador encontrado com os critérios informados.");
+                }
             })
             .catch(() => {
                 addMessage("Erro ao buscar moradores.");
@@ -133,13 +146,13 @@ function selecionarMorador() {
 
 function enviarParaMorador(pessoa) {
     addMessage(pessoa.Nome, "user");
-    
+
     const msg = chatState.tipo === "Visitante"
         ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do prédio nº ${chatState.bloco}, poderia me receber?`
         : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao nº ${chatState.bloco}. Poderia vir buscar?`;
 
     const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
-    
+
     botTyping(() => {
         addMessage("Clique abaixo para chamar o morador:");
         inputContainer.innerHTML = `<a href="${link}" target="_blank"><button>Chamar ${pessoa.Nome} no WhatsApp</button></a>`;
