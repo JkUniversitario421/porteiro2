@@ -1,3 +1,4 @@
+<script>
 const chatBox = document.getElementById("chat-box");
 const inputContainer = document.getElementById("input-container");
 let chatState = { step: 0, bloco: "", tipo: "", plataforma: "", nome: "" };
@@ -66,7 +67,6 @@ function selectTipo(tipo) {
             `;
         });
     } else {
-        // Se for Visitante, pergunta o nome antes de continuar
         botTyping(() => {
             addMessage("Qual o seu nome?");
             inputContainer.innerHTML = `
@@ -106,14 +106,14 @@ function enviarNomeVisitante() {
     if (!nome) return;
     chatState.nome = nome;
     addMessage(nome, "user");
-    selecionarMorador(); // Vai para a seleção de morador
+    selecionarMorador();
 }
 
 function selecionarMorador() {
     botTyping(() => {
         addMessage("Selecione o morador:");
-        
-        fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
+
+        fetch("https://sheetdb.io/api/v1/g6f3ljg6px6yr")
             .then(res => res.json())
             .then(data => {
                 const moradores = data.filter(p => p.Prédio === chatState.bloco || p.Predio === chatState.bloco);
@@ -125,6 +125,10 @@ function selecionarMorador() {
                     btn.onclick = () => enviarParaMorador(pessoa);
                     inputContainer.appendChild(btn);
                 });
+
+                if (moradores.length === 0) {
+                    addMessage("Nenhum morador encontrado para esse prédio.");
+                }
             })
             .catch(() => {
                 addMessage("Erro ao buscar moradores.");
@@ -134,13 +138,19 @@ function selecionarMorador() {
 
 function enviarParaMorador(pessoa) {
     addMessage(pessoa.Nome, "user");
-    
-    const msg = chatState.tipo === "Visitante"
-        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do predio do N° ${chatState.bloco}, poderia me receber?.`
-        : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao N° ${chatState.bloco}. Poderia vir buscar?`;
 
-    const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
-    
+    const msg = chatState.tipo === "Visitante"
+        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do prédio nº ${chatState.bloco}, poderia me receber?`
+        : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao prédio nº ${chatState.bloco}. Poderia vir buscar?`;
+
+    let numero = pessoa.Telefone || pessoa.WhatsApp || "";
+    numero = numero.replace(/\D/g, "");
+    if (!numero.startsWith("55")) {
+        numero = "55" + numero;
+    }
+
+    const link = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+
     botTyping(() => {
         addMessage("Clique abaixo para chamar o morador:");
         inputContainer.innerHTML = `<a href="${link}" target="_blank"><button>Chamar ${pessoa.Nome} no WhatsApp</button></a>`;
@@ -148,3 +158,4 @@ function enviarParaMorador(pessoa) {
 }
 
 startChat();
+</script>
