@@ -115,17 +115,22 @@ function selecionarMorador() {
         fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
             .then(res => res.json())
             .then(data => {
-                // Filtrar linhas onde Nome, Prédio e Telefone/WhatsApp estejam preenchidos
                 const moradores = data.filter(p =>
                     p.Nome && p.Nome.trim() !== "" &&
                     (p.Prédio || p.Predio) && (p.Prédio || p.Predio).trim() !== "" &&
-                    (p.Telefone || p.WhatsApp) && (p.Telefone || p.WhatsApp).trim() !== ""
+                    (p.Telefone || p.WhatsApp) && (p.Telefone || p.WhatsApp).trim() !== "" &&
+                    (
+                        (p.Prédio && p.Prédio === chatState.bloco) ||
+                        (p.Predio && p.Predio === chatState.bloco)
+                    )
                 );
 
-                // Se quiser filtrar por prédio selecionado, descomente a linha abaixo:
-                // moradores = moradores.filter(p => (p.Prédio === chatState.bloco || p.Predio === chatState.bloco));
-
                 inputContainer.innerHTML = "";
+
+                if (moradores.length === 0) {
+                    addMessage("Nenhum morador encontrado para o prédio selecionado.");
+                    return;
+                }
 
                 moradores.forEach(pessoa => {
                     const btn = document.createElement("button");
@@ -133,10 +138,6 @@ function selecionarMorador() {
                     btn.onclick = () => enviarParaMorador(pessoa);
                     inputContainer.appendChild(btn);
                 });
-
-                if (moradores.length === 0) {
-                    addMessage("Nenhum morador encontrado com os critérios informados.");
-                }
             })
             .catch(() => {
                 addMessage("Erro ao buscar moradores.");
