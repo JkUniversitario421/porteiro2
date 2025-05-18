@@ -1,5 +1,6 @@
 const chatBox = document.getElementById("chat-box");
 const inputContainer = document.getElementById("input-container");
+
 let chatState = { step: 0, bloco: "", tipo: "", plataforma: "", nome: "" };
 
 function botTyping(callback, delay = 1000) {
@@ -87,7 +88,7 @@ function plataformaOutros() {
 }
 
 function selectPlataformaOutros() {
-    const plataforma = document.getElementById("outraPlataforma").value;
+    const plataforma = document.getElementById("outraPlataforma").value.trim();
     if (!plataforma) return;
     chatState.plataforma = plataforma;
     addMessage(plataforma, "user");
@@ -101,7 +102,7 @@ function selectPlataforma(plataforma) {
 }
 
 function enviarNomeVisitante() {
-    const nome = document.getElementById("nomeVisitante").value;
+    const nome = document.getElementById("nomeVisitante").value.trim();
     if (!nome) return;
     chatState.nome = nome;
     addMessage(nome, "user");
@@ -119,7 +120,7 @@ function selecionarMorador() {
                     p.Nome && p.Nome.trim() !== "" &&
                     p.Predio && p.Predio.trim() !== "" &&
                     p.Telefone && p.Telefone.trim() !== "" &&
-                    p.Predio === chatState.bloco
+                    p.Predio.trim() === chatState.bloco.trim()
                 );
 
                 inputContainer.innerHTML = "";
