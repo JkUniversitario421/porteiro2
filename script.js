@@ -115,9 +115,10 @@ function selecionarMorador() {
         fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
             .then(res => res.json())
             .then(data => {
+                // Filtra os moradores que têm o prédio igual ao selecionado
                 const moradores = data.filter(p =>
-                    (p.Prédio && String(p.Prédio).trim() === String(chatState.bloco).trim()) ||
-                    (p.Predio && String(p.Predio).trim() === String(chatState.bloco).trim())
+                    (p.Nome && p.Nome.trim() !== "") &&
+                    (p.Predio === chatState.bloco || p.Prédio === chatState.bloco)
                 );
 
                 inputContainer.innerHTML = "";
