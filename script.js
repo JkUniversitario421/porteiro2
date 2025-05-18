@@ -117,12 +117,9 @@ function selecionarMorador() {
             .then(data => {
                 const moradores = data.filter(p =>
                     p.Nome && p.Nome.trim() !== "" &&
-                    (p.Prédio || p.Predio) && (p.Prédio || p.Predio).trim() !== "" &&
-                    (p.Telefone || p.WhatsApp) && (p.Telefone || p.WhatsApp).trim() !== "" &&
-                    (
-                        (p.Prédio && p.Prédio === chatState.bloco) ||
-                        (p.Predio && p.Predio === chatState.bloco)
-                    )
+                    p.Prédio && p.Prédio.trim() !== "" &&
+                    p.Telefone && p.Telefone.trim() !== "" &&
+                    p.Prédio === chatState.bloco
                 );
 
                 inputContainer.innerHTML = "";
@@ -152,7 +149,8 @@ function enviarParaMorador(pessoa) {
         ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do prédio nº ${chatState.bloco}, poderia me receber?`
         : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao nº ${chatState.bloco}. Poderia vir buscar?`;
 
-    const link = `https://wa.me/${pessoa.WhatsApp || pessoa.Telefone}?text=${encodeURIComponent(msg)}`;
+    const telefoneFormatado = pessoa.Telefone.replace(/\D/g, '');
+    const link = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msg)}`;
 
     botTyping(() => {
         addMessage("Clique abaixo para chamar o morador:");
