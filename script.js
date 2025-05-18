@@ -116,11 +116,13 @@ function selecionarMorador() {
         fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
             .then(res => res.json())
             .then(data => {
+                console.log("Dados da planilha recebidos:", data);
+
                 const moradores = data.filter(p =>
                     p.Nome && p.Nome.trim() !== "" &&
-                    p.Predio && p.Predio.trim() !== "" &&
+                    p.Predio && p.Predio.toString().trim() !== "" &&
                     p.Telefone && p.Telefone.trim() !== "" &&
-                    p.Predio.trim() === chatState.bloco.trim()
+                    p.Predio.toString().trim() === chatState.bloco.toString().trim()
                 );
 
                 inputContainer.innerHTML = "";
@@ -137,7 +139,8 @@ function selecionarMorador() {
                     inputContainer.appendChild(btn);
                 });
             })
-            .catch(() => {
+            .catch((err) => {
+                console.error("Erro ao buscar dados:", err);
                 addMessage("Erro ao buscar moradores.");
             });
     });
