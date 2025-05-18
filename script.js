@@ -1,6 +1,7 @@
 const chatBox = document.getElementById("chat-box");
 const inputContainer = document.getElementById("input-container");
-let chatState = { step: 0, bloco: "", tipo: "", plataforma: "", nome: "" };
+
+let chatState = { step: 0, predio: "", tipo: "", plataforma: "", nome: "" };
 
 function botTyping(callback, delay = 1000) {
     const typingMsg = document.createElement("div");
@@ -33,15 +34,15 @@ function startFlow() {
     botTyping(() => {
         addMessage("Em qual prédio você está?");
         inputContainer.innerHTML = `
-            <button onclick="selectBloco('411')">411</button>
-            <button onclick="selectBloco('421')">421</button>
+            <button onclick="selectPredio('411')">411</button>
+            <button onclick="selectPredio('421')">421</button>
         `;
     });
 }
 
-function selectBloco(bloco) {
-    chatState.bloco = bloco;
-    addMessage(bloco, "user");
+function selectPredio(predio) {
+    chatState.predio = predio;
+    addMessage(predio, "user");
     botTyping(() => {
         addMessage("Você é visitante ou entregador?");
         inputContainer.innerHTML = `
@@ -115,10 +116,9 @@ function selecionarMorador() {
         fetch("https://sheetdb.io/api/v1/3jmbakmuen9nd")
             .then(res => res.json())
             .then(data => {
-                // Filtra os moradores que têm o prédio igual ao selecionado
                 const moradores = data.filter(p =>
-                    (p.Nome && p.Nome.trim() !== "") &&
-                    (p.Predio === chatState.bloco || p.Prédio === chatState.bloco)
+                    p.Nome && p.Nome.trim() !== "" &&
+                    (p.Prédio === chatState.predio || p.Predio === chatState.predio) // Aceita "Prédio" ou "Predio"
                 );
 
                 inputContainer.innerHTML = "";
@@ -145,11 +145,12 @@ function enviarParaMorador(pessoa) {
     addMessage(pessoa.Nome, "user");
 
     const msg = chatState.tipo === "Visitante"
-        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do prédio nº ${chatState.bloco}, poderia me receber?`
-        : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao nº ${chatState.bloco}. Poderia vir buscar?`;
+        ? `Olá ${pessoa.Nome}, aqui é ${chatState.nome} estou na frente do prédio nº ${chatState.predio}, poderia me receber?`
+        : `Olá ${pessoa.Nome}, estou com a sua entrega da ${chatState.plataforma} em frente ao nº ${chatState.predio}. Poderia vir buscar?`;
 
-    const telefone = (pessoa.WhatsApp || pessoa.Telefone || "").replace(/\D/g, "");
-    const link = `https://wa.me/${telefone}?text=${encodeURIComponent(msg)}`;
+    const telefone = pessoa.WhatsApp || pessoa.Telefone || "";
+    const telefoneFormatado = telefone.replace(/\D/g, "");
+    const link = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msg)}`;
 
     botTyping(() => {
         addMessage("Clique abaixo para chamar o morador:");
