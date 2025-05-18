@@ -117,9 +117,9 @@ function selecionarMorador() {
             .then(data => {
                 const moradores = data.filter(p =>
                     p.Nome && p.Nome.trim() !== "" &&
-                    p.Prédio && p.Prédio.trim() !== "" &&
+                    p.Predio && p.Predio.trim() !== "" &&
                     p.Telefone && p.Telefone.trim() !== "" &&
-                    p.Prédio === chatState.bloco
+                    p.Predio === chatState.bloco
                 );
 
                 inputContainer.innerHTML = "";
